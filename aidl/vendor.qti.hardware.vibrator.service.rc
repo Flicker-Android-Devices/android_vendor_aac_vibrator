@@ -1,8 +1,18 @@
+on late-fs
+    chmod 0666 /dev/aw8697_haptic
+    chown system system /dev/aw8697_haptic
+
 service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
-    class hal
+    class late_start
     user system
     group system input wakelock
     capabilities BLOCK_SUSPEND
 
+    setenv RICHTAP_DEVICE_PATH  /dev/aw8697_haptic
+    setenv ENV_RICHTAP_CONFIG_PATH /vendor/etc/aac_richtap.config
+
 on late-init
     write /sys/class/leds/vibrator/trigger "transient"
+
+on property:sys.boot_completed=1
+    setprop vendor.haptic.calibrate.done 1

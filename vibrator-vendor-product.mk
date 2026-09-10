@@ -19,4 +19,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
       vendor/qcom/opensource/vibrator/aidl/HapticsPolicy.xml:vendor/etc/HapticsPolicy.xml
 
+$(call inherit-product, vendor/qcom/opensource/vibrator/richtap-ext/richtap-product.mk)
+
 endif

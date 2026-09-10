@@ -40,6 +40,7 @@ cc_binary {
     cflags: Common_CFlags,
     srcs: [
         "service.cpp",
+        "richtap/*.cpp",
     ],
     shared_libs: [
         "libcutils",
@@ -47,7 +48,10 @@ cc_binary {
         "libbase",
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
+        "vendor.aac.hardware.richtap.vibrator-V2-ndk",
         "vendor.qti.hardware.vibrator.impl",
+        "libaacvibrator",
+        "liblog",
     ],
 }
 

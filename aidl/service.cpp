@@ -39,17 +39,39 @@
 
 #include "Vibrator.h"
 
+//add by AAC for RichTap support
+#include <thread>
+#include <android-base/properties.h>
+#include "richtap/RichtapVibrator.h"
+using aidl::vendor::aac::hardware::richtap::vibrator::RichtapVibrator;
 using aidl::android::hardware::vibrator::Vibrator;
 
+// when boot_completed ,we set this prop to 1
+constexpr char kHapticCalibrateProp[] = "vendor.haptic.calibrate.done";
 int main() {
     ABinderProcess_setThreadPoolMaxThreadCount(0);
     ABinderProcess_startThreadPool();
 
     std::shared_ptr<Vibrator> vib = ndk::SharedRefBase::make<Vibrator>();
+    ndk::SpAIBinder vibBinder = vib->asBinder(); // must have this ,i don't know why
+
+    // add by AAC for RichTap support
+    // making the extension service
+    std::shared_ptr<RichtapVibrator> cvib = ndk::SharedRefBase::make<RichtapVibrator>();
+
+    // need to attach the extension to the same binder we will be registering
+    CHECK(STATUS_OK == AIBinder_setExtension(vibBinder.get(), cvib->asBinder().get()));
 
     const std::string instance = std::string() + Vibrator::descriptor + "/default";
     binder_status_t status = AServiceManager_addService(vib->asBinder().get(), instance.c_str());
     CHECK(status == STATUS_OK);
+
+    std::thread initThread([&]() {
+        using std::literals::chrono_literals::operator""s;
+        ::android::base::WaitForProperty(kHapticCalibrateProp, "1", 500s);
+        cvib->init(nullptr);
+    });
+    initThread.detach();
 
     ABinderProcess_joinThreadPool();
     return EXIT_FAILURE;  // should not reach
