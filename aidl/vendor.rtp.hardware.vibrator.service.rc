@@ -2,7 +2,7 @@ on late-fs
     chmod 0666 /dev/aw8697_haptic
     chown system system /dev/aw8697_haptic
 
-service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
+service vendor.rtp.vibrator /vendor/bin/hw/vendor.rtp.hardware.vibrator.service
     class late_start
     user system
     group system input wakelock

@@ -2,7 +2,7 @@ Common_CFlags = ["-Wall"]
 Common_CFlags += ["-Werror"]
 
 cc_library_shared {
-    name: "vendor.qti.hardware.vibrator.impl",
+    name: "vendor.rtp.hardware.vibrator.impl",
     vendor: true,
     cflags: Common_CFlags + select(soong_config_variable("qti_vibrator", "use_libpalclient"), {
         true: ["-DUSE_LIBPALCLIENT"],
@@ -17,10 +17,10 @@ cc_library_shared {
         "liblog",
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
-        "vendor.qti.hardware.vibratorOL.impl",
-        "vendor.qti.hardware.vibratorSel.impl",
+        "vendor.rtp.hardware.vibratorOL.impl",
+        "vendor.rtp.hardware.vibratorSel.impl",
     ] + select(soong_config_variable("qti_vibrator", "use_libpalclient"), {
-        true: ["vendor.qti.hardware.vibratorCL.impl"],
+        true: ["vendor.rtp.hardware.vibratorCL.impl"],
         default: [],
     }),
     export_include_dirs: ["include"],
@@ -30,12 +30,12 @@ cc_library_shared {
 }
 
 cc_binary {
-    name: "vendor.qti.hardware.vibrator.service",
+    name: "vendor.rtp.hardware.vibrator.service",
     vendor: true,
     relative_install_path: "hw",
-    init_rc: ["vendor.qti.hardware.vibrator.service.rc"],
+    init_rc: ["vendor.rtp.hardware.vibrator.service.rc"],
     vintf_fragments: [
-        "vendor.qti.hardware.vibrator.service.xml",
+        "vendor.rtp.hardware.vibrator.service.xml",
     ],
     cflags: Common_CFlags,
     srcs: [
@@ -49,14 +49,14 @@ cc_binary {
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
         "vendor.aac.hardware.richtap.vibrator-V2-ndk",
-        "vendor.qti.hardware.vibrator.impl",
+        "vendor.rtp.hardware.vibrator.impl",
         "libaacvibrator",
         "liblog",
     ],
 }
 
 cc_fuzz {
-    name: "vendor.qti.hardware.vibrator-service.aidl_fuzzer",
+    name: "vendor.rtp.hardware.vibrator-service.aidl_fuzzer",
     vendor: true,
 
     shared_libs: [
@@ -67,7 +67,7 @@ cc_fuzz {
         "libbinder",
         "libbinder_ndk",
         "android.hardware.vibrator-V2-ndk",
-        "vendor.qti.hardware.vibrator.impl",
+        "vendor.rtp.hardware.vibrator.impl",
     ],
 
     static_libs: [

@@ -32,7 +32,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define LOG_TAG "vendor.qti.vibratorCL"
+#define LOG_TAG "vendor.rtp.vibratorCL"
 
 #include <dirent.h>
 #include <inttypes.h>

@@ -1,5 +1,5 @@
 cc_library_shared {
-    name: "vendor.qti.hardware.vibratorSel.impl",
+    name: "vendor.rtp.hardware.vibratorSel.impl",
     vendor: true,
     srcs: [
         "VibratorSelector.cpp",

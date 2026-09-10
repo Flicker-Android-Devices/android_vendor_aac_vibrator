@@ -2,13 +2,13 @@ Common_CFlags = ["-Wall"]
 Common_CFlags += ["-Werror"]
 
 cc_library_headers {
-    name: "libqtivibratoreffect_headers",
+    name: "libqtivibratoreffect_headers_rtp",
     vendor: true,
     export_include_dirs: ["."],
 }
 
 cc_library_shared {
-    name: "libqtivibratoreffect",
+    name: "libqtivibratoreffect_rtp",
     vendor: true,
     cflags: Common_CFlags,
     srcs: [
@@ -21,7 +21,7 @@ cc_library_shared {
 }
 
 cc_library_shared {
-    name: "libqtivibratoreffectoffload",
+    name: "libqtivibratoreffectoffload_rtp",
     vendor: true,
     cflags: Common_CFlags,
     srcs: [

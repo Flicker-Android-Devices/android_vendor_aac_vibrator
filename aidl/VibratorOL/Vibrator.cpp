@@ -26,7 +26,7 @@
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
-#define LOG_TAG "vendor.qti.vibratorOL"
+#define LOG_TAG "vendor.rtp.vibratorOL"
 
 #include <cutils/properties.h>
 #include <dirent.h>

@@ -31,7 +31,7 @@
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
-#define LOG_TAG "vendor.qti.hardware.vibrator.service"
+#define LOG_TAG "vendor.rtp.hardware.vibrator.service"
 
 #include <android-base/logging.h>
 #include <android/binder_manager.h>

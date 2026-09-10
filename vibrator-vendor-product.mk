@@ -9,7 +9,7 @@ endif #TARGET_USES_QMAA
 
 ifneq ($(TARGET_DISABLE_VIBRATOR),true)
 QTI_VIBRATOR_HAL_SERVICE := \
-      vendor.qti.hardware.vibrator.service
+      vendor.rtp.hardware.vibrator.service
 
 PRODUCT_PACKAGES += $(QTI_VIBRATOR_HAL_SERVICE)
 

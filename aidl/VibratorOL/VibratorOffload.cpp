@@ -31,7 +31,7 @@
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
-#define LOG_TAG "vendor.qti.vibrator.offload"
+#define LOG_TAG "vendor.rtp.vibrator.offload"
 
 #include <stdio.h>
 #include <stdint.h>
