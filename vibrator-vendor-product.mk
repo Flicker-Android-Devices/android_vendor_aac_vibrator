@@ -14,11 +14,11 @@ QTI_VIBRATOR_HAL_SERVICE := \
 PRODUCT_PACKAGES += $(QTI_VIBRATOR_HAL_SERVICE)
 
 PRODUCT_COPY_FILES += \
-      vendor/qcom/opensource/vibrator/excluded-input-devices.xml:vendor/etc/excluded-input-devices.xml
+      vendor/aac/vibrator/excluded-input-devices.xml:vendor/etc/excluded-input-devices.xml
 
 PRODUCT_COPY_FILES += \
-      vendor/qcom/opensource/vibrator/aidl/HapticsPolicy.xml:vendor/etc/HapticsPolicy.xml
+      vendor/aac/vibrator/aidl/HapticsPolicy.xml:vendor/etc/HapticsPolicy.xml
 
-$(call inherit-product, vendor/qcom/opensource/vibrator/richtap-ext/richtap-product.mk)
+$(call inherit-product, vendor/aac/vibrator/richtap-ext/richtap-product.mk)
 
 endif

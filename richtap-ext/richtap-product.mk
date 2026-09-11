@@ -3,7 +3,7 @@ LOCAL_PATH := $(call my-dir)
 #PRODUCT_PACKAGES += \
 #        vendor.aac.hardware.richtap.vibrator
 
-BOARD_VENDOR_SEPOLICY_DIRS += vendor/qcom/opensource/vibrator/richtap-ext/sepolicy
+BOARD_VENDOR_SEPOLICY_DIRS += vendor/aac/vibrator/richtap-ext/sepolicy
 
 # aac richtap config path
 # PRODUCT_PROPERTY_OVERRIDES += \
