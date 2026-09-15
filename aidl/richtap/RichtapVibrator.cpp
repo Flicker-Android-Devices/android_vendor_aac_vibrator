@@ -21,9 +21,25 @@
 #include <inttypes.h>
 #include <log/log.h>
 #include <thread>
+#include <cutils/properties.h>
 
 namespace aidl::vendor::aac::hardware::richtap::vibrator {
 using aidl::vendor::aac::hardware::richtap::vibrator::RichtapVibrator;
+
+static int32_t get_safe_amplitude(int32_t amplitude) {
+    if (amplitude <= 0) {
+        return 0;
+    }
+    int32_t max_amp = property_get_int32("persist.vendor.haptic.max_amp", 255);
+    if (max_amp <= 0 || max_amp >= 255) {
+        return amplitude;
+    }
+    int32_t scaled = (amplitude * max_amp) / 255;
+    if (scaled < 1 && amplitude > 0) {
+        scaled = 1;
+    }
+    return scaled;
+}
 
 
 void RichtapVibrator::send_handle_result(const std::shared_ptr<IRichtapCallback>& callback,
@@ -92,7 +108,8 @@ ndk::ScopedAStatus RichtapVibrator::on(int32_t timeoutMs, const std::shared_ptr<
 
 ndk::ScopedAStatus RichtapVibrator::setAmplitude(int32_t amplitude,const std::shared_ptr<IRichtapCallback>& callback) {
     if(m_richtap_support){
-        uint8_t tmp = (uint8_t)(amplitude);
+        int32_t safe_amp = get_safe_amplitude(amplitude);
+        uint8_t tmp = (uint8_t)(safe_amp);
         int32_t ret =aac_vibra_setAmplitude(tmp);
         if(ret != 0){
             ALOGE("aac setAmplitude command failed : %s", strerror(-ret));
@@ -194,10 +211,11 @@ ndk::ScopedAStatus RichtapVibrator::performHe(int32_t looper,int32_t interval,in
             send_handle_result(callback,DEFAULT_RETURN_TIME_OUT,RICHTAP_HANDLE_FAILED);
             return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_ILLEGAL_STATE));
         }
-        ALOGD("looper:%d,interval:%d,amplitude:%d,freq:%d", looper,interval,amplitude,freq);
+        int32_t safe_amp = get_safe_amplitude(amplitude);
+        ALOGD("looper:%d,interval:%d,amplitude:%d,safe_amp:%d,freq:%d", looper,interval,amplitude,safe_amp,freq);
         const int32_t *he_data = he.data();
         int32_t data_len = static_cast<int32_t>(he.size());
-        int32_t timeout_ms = aac_vibra_looper_post((const int32_t *)he_data, data_len,interval,looper,amplitude,freq);
+        int32_t timeout_ms = aac_vibra_looper_post((const int32_t *)he_data, data_len,interval,looper,safe_amp,freq);
         if(timeout_ms < 0){
             ALOGE("invalid perform he failed");
             send_handle_result(callback,DEFAULT_RETURN_TIME_OUT,RICHTAP_HANDLE_FAILED);
@@ -226,7 +244,8 @@ ndk::ScopedAStatus RichtapVibrator::performHeParam(int32_t interval,int32_t ampl
                 return ndk::ScopedAStatus::ok();
             }
         }else{
-            bool ret = aac_vibra_looper_performParam(interval,amplitude,freq);
+            int32_t safe_amp = get_safe_amplitude(amplitude);
+            bool ret = aac_vibra_looper_performParam(interval,safe_amp,freq);
             if(!ret){
                 send_handle_result(callback,DEFAULT_RETURN_TIME_OUT,RICHTAP_HANDLE_FAILED);
                 return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_ILLEGAL_STATE));
@@ -263,7 +282,8 @@ ndk::ScopedAStatus RichtapVibrator::setHapticParam(const std::vector<int32_t>& d
 
 ndk::ScopedAStatus RichtapVibrator::setDynamicScale(int32_t scale,const std::shared_ptr<IRichtapCallback>& callback){
     if(m_richtap_support){
-        int32_t ret = aac_vibra_dynamic_scale(scale);
+        int32_t safe_scale = get_safe_amplitude(scale);
+        int32_t ret = aac_vibra_dynamic_scale(safe_scale);
         if(ret != 0){
             ALOGE("setDynamicScale command failed : %s", strerror(-ret));
             send_handle_result(callback,DEFAULT_RETURN_TIME_OUT,RICHTAP_HANDLE_FAILED);
