@@ -205,6 +205,177 @@ bool InputFFDevice::isPresent() {
     return (mVibraFd != INVALID_VALUE);
 }
 
+// Xiaomi AW8697 RTP effect IDs (Kernel aw8697_rtp_name index + 10)
+enum XiaomiRtpEffect : int {
+    RTP_GESTURE_UPSLIDE       = 72,  // Gesture_UpSlide_RTP.bin
+    RTP_CHARGE_WIRE           = 74,  // Charge_Wire_RTP.bin
+    RTP_CHARGE_WIRELESS       = 75,  // Charge_Wireless_RTP.bin
+    RTP_UNLOCK_FAILED         = 76,  // Unlock_Failed_RTP.bin
+    RTP_SCREENSHOT            = 85,  // screenshot_rtp.bin
+    RTP_FOD_MOTION_RIPPLE     = 159, // FOD_Motion_Ripple_RTP.bin
+    RTP_GESTURE_BACK_PULL     = 162, // Gesture_Back_Pull_RTP.bin
+    RTP_GESTURE_BACK_RELEASE  = 163, // Gesture_Back_Release_RTP.bin
+    RTP_ALERT                 = 164, // alert_rtp.bin
+    RTP_FEEDBACK_NEGATIVE_LT  = 165, // feedback_negative_light_rtp.bin
+    RTP_FEEDBACK_NEUTRAL      = 166, // feedback_neutral_rtp.bin
+    RTP_FEEDBACK_POSITIVE     = 167, // feedback_positive_rtp.bin
+    RTP_FINGERPRINT_RECORD    = 168, // fingerprint_record_rtp.bin
+    RTP_LOCKDOWN              = 169, // lockdown_rtp.bin
+    RTP_SLIDING_DAMPING       = 170, // sliding_damping_rtp.bin
+    RTP_TODO_ALLDONE          = 171, // todo_alldone_rtp.bin
+    RTP_SIGNAL_BUTTON         = 175, // signal_button_rtp.bin
+    RTP_SIGNAL_CLOCK_HIGH     = 176, // signal_clock_high_rtp.bin
+    RTP_SIGNAL_CLOCK_UNIT     = 178, // signal_clock_unit_rtp.bin
+    RTP_SIGNAL_KEY_HIGH       = 180, // signal_key_high_rtp.bin
+    RTP_SIGNAL_KEY_UNIT       = 181, // signal_key_unit_rtp.bin
+    RTP_SIGNAL_LIST           = 183, // signal_list_rtp.bin
+    RTP_SIGNAL_POPUP          = 185, // signal_popup_rtp.bin
+    RTP_SIGNAL_SEEKBAR        = 186, // signal_seekbar_rtp.bin
+    RTP_SIGNAL_SWITCH         = 187, // signal_switch_rtp.bin
+    RTP_SIGNAL_TAB            = 188, // signal_tab_rtp.bin
+    RTP_SIGNAL_TEXT           = 189, // signal_text_rtp.bin
+};
+
+static long getRtpDurationMs(int rtpId) {
+    switch (rtpId) {
+    case RTP_GESTURE_UPSLIDE:       // 72: Gesture_UpSlide_RTP.bin (4985 bytes @ 24kHz)
+        return 208;
+    case RTP_CHARGE_WIRE:           // 74: Charge_Wire_RTP.bin (16296 bytes @ 24kHz)
+        return 679;
+    case RTP_CHARGE_WIRELESS:       // 75: Charge_Wireless_RTP.bin (20380 bytes @ 24kHz)
+        return 849;
+    case RTP_UNLOCK_FAILED:         // 76: Unlock_Failed_RTP.bin (6422 bytes @ 24kHz)
+        return 268;
+    case RTP_SCREENSHOT:            // 85: screenshot_rtp.bin (2016 bytes @ 24kHz)
+        return 84;
+    case RTP_FOD_MOTION_RIPPLE:     // 159: FOD_Motion_Ripple_RTP.bin (14004 bytes @ 24kHz)
+        return 584;
+    case RTP_GESTURE_BACK_PULL:     // 162: Gesture_Back_Pull_RTP.bin (735 bytes @ 24kHz)
+        return 31;
+    case RTP_GESTURE_BACK_RELEASE:  // 163: Gesture_Back_Release_RTP.bin (559 bytes @ 24kHz)
+        return 23;
+    case RTP_ALERT:                 // 164: alert_rtp.bin (4089 bytes @ 24kHz)
+        return 170;
+    case RTP_FEEDBACK_NEGATIVE_LT:  // 165: feedback_negative_light_rtp.bin (2812 bytes @ 24kHz)
+        return 117;
+    case RTP_FEEDBACK_NEUTRAL:      // 166: feedback_neutral_rtp.bin (344 bytes @ 24kHz)
+        return 14;
+    case RTP_FEEDBACK_POSITIVE:     // 167: feedback_positive_rtp.bin (3298 bytes @ 24kHz)
+        return 137;
+    case RTP_FINGERPRINT_RECORD:    // 168: fingerprint_record_rtp.bin (735 bytes @ 24kHz)
+        return 31;
+    case RTP_LOCKDOWN:              // 169: lockdown_rtp.bin (1543 bytes @ 24kHz)
+        return 64;
+    case RTP_SLIDING_DAMPING:       // 170: sliding_damping_rtp.bin (4714 bytes @ 24kHz)
+        return 196;
+    case RTP_TODO_ALLDONE:          // 171: todo_alldone_rtp.bin (10664 bytes @ 24kHz)
+        return 444;
+    case RTP_SIGNAL_BUTTON:         // 175: signal_button_rtp.bin (3530 bytes @ 24kHz)
+        return 147;
+    case RTP_SIGNAL_CLOCK_HIGH:     // 176: signal_clock_high_rtp.bin (6487 bytes @ 24kHz)
+        return 270;
+    case RTP_SIGNAL_CLOCK_UNIT:     // 178: signal_clock_unit_rtp.bin (293 bytes @ 24kHz)
+        return 12;
+    case RTP_SIGNAL_KEY_HIGH:       // 180: signal_key_high_rtp.bin (3530 bytes @ 24kHz)
+        return 147;
+    case RTP_SIGNAL_KEY_UNIT:       // 181: signal_key_unit_rtp.bin (312 bytes @ 24kHz)
+        return 13;
+    case RTP_SIGNAL_LIST:           // 183: signal_list_rtp.bin (288 bytes @ 24kHz)
+        return 12;
+    case RTP_SIGNAL_POPUP:          // 185: signal_popup_rtp.bin (4022 bytes @ 24kHz)
+        return 168;
+    case RTP_SIGNAL_SEEKBAR:        // 186: signal_seekbar_rtp.bin (5424 bytes @ 24kHz)
+        return 226;
+    case RTP_SIGNAL_SWITCH:         // 187: signal_switch_rtp.bin (2079 bytes @ 24kHz)
+        return 87;
+    case RTP_SIGNAL_TAB:            // 188: signal_tab_rtp.bin (602 bytes @ 24kHz)
+        return 25;
+    case RTP_SIGNAL_TEXT:           // 189: signal_text_rtp.bin (2290 bytes @ 24kHz)
+        return 95;
+    default:
+        return 0;
+    }
+}
+
+static int getRtpIdForPrimitive(CompositePrimitive primitive) {
+    switch (primitive) {
+    case CompositePrimitive::CLICK:
+        return RTP_FEEDBACK_NEUTRAL;     // 166: feedback_neutral_rtp.bin (Crisp click)
+    case CompositePrimitive::THUD:
+        return RTP_SLIDING_DAMPING;      // 170: sliding_damping_rtp.bin (Scroll limit)
+    case CompositePrimitive::SPIN:
+        return RTP_GESTURE_UPSLIDE;      // 72: Gesture_UpSlide_RTP.bin
+    case CompositePrimitive::QUICK_RISE:
+        return RTP_GESTURE_BACK_PULL;    // 162: Gesture_Back_Pull_RTP.bin
+    case CompositePrimitive::SLOW_RISE:
+        return RTP_GESTURE_UPSLIDE;      // 72: Gesture_UpSlide_RTP.bin
+    case CompositePrimitive::QUICK_FALL:
+        return RTP_GESTURE_BACK_RELEASE; // 163: Gesture_Back_Release_RTP.bin
+    case CompositePrimitive::LIGHT_TICK:
+        return RTP_FEEDBACK_NEUTRAL;     // 166: feedback_neutral_rtp.bin (Crisp click for keyboard typing)
+    case CompositePrimitive::LOW_TICK:
+        return RTP_GESTURE_BACK_PULL;    // 162: Gesture_Back_Pull_RTP.bin
+    default:
+        return RTP_FEEDBACK_NEUTRAL;     // 166
+    }
+}
+
+static int getEffectId(Effect effect) {
+    switch (effect) {
+    // Standard AOSP effects mapped to Xiaomi factory RTP waveforms (Global touch experience)
+    case Effect::CLICK:
+        return RTP_FEEDBACK_NEUTRAL;     // 166: feedback_neutral_rtp.bin (Crisp click, 14ms)
+    case Effect::DOUBLE_CLICK:
+        return RTP_LOCKDOWN;             // 169: lockdown_rtp.bin (True double click, 64ms)
+    case Effect::TICK:
+        return RTP_GESTURE_BACK_PULL;    // 162: Gesture_Back_Pull_RTP.bin (Gesture pull elastic thump, 31ms)
+    case Effect::THUD:
+        return RTP_SLIDING_DAMPING;      // 170: sliding_damping_rtp.bin (Scroll limit, 196ms)
+    case Effect::POP:
+        return RTP_FEEDBACK_NEGATIVE_LT; // 165: feedback_negative_light_rtp.bin (Negative light pop, 117ms)
+    case Effect::HEAVY_CLICK:
+        return RTP_FEEDBACK_POSITIVE;    // 167: feedback_positive_rtp.bin (Heavy click, 137ms)
+    case Effect::TEXTURE_TICK:
+        return RTP_SIGNAL_CLOCK_UNIT;    // 178: signal_clock_unit_rtp.bin (Clock texture unit, 12ms)
+
+    // Dedicated RAM hardware waveforms (AW8697 SRAM loaded waveforms)
+    case Effect::RINGTONE_1:
+        return 0;                        // RAM ID 0: wf_0 (CLICK, 20ms)
+    case Effect::RINGTONE_2:
+        return 1;                        // RAM ID 1: wf_1 (DOUBLE CLICK, 20ms)
+    case Effect::RINGTONE_3:
+        return 2;                        // RAM ID 2: wf_2 (TICK, 20ms)
+    case Effect::RINGTONE_4:
+        return 4;                        // RAM ID 4: wf_4 (POP, 28ms)
+    case Effect::RINGTONE_5:
+        return 5;                        // RAM ID 5: wf_5 (HEAVY CLICK, 20ms)
+
+    // Reallocated factory RTP waveforms for rich XML customization (no duplicates of basic effects)
+    case Effect::RINGTONE_6:
+        return RTP_SIGNAL_SWITCH;        // 187: signal_switch_rtp.bin (Toggle switch, 87ms)
+    case Effect::RINGTONE_7:
+        return RTP_SIGNAL_SEEKBAR;       // 186: signal_seekbar_rtp.bin (Seekbar notch/tick, 226ms)
+    case Effect::RINGTONE_8:
+        return RTP_SIGNAL_POPUP;         // 185: signal_popup_rtp.bin (Popup menu/dialog, 168ms)
+    case Effect::RINGTONE_9:
+        return RTP_SIGNAL_TAB;           // 188: signal_tab_rtp.bin (Tab page switch, 25ms)
+    case Effect::RINGTONE_10:
+        return RTP_SIGNAL_TEXT;          // 189: signal_text_rtp.bin (Text selection / cursor, 95ms)
+    case Effect::RINGTONE_11:
+        return RTP_SIGNAL_BUTTON;        // 175: signal_button_rtp.bin (Main action button, 147ms)
+    case Effect::RINGTONE_12:
+        return RTP_TODO_ALLDONE;         // 171: todo_alldone_rtp.bin (Operation all done fanfare, 444ms)
+    case Effect::RINGTONE_13:
+        return RTP_ALERT;                // 164: alert_rtp.bin (Alert notice, 170ms)
+    case Effect::RINGTONE_14:
+        return RTP_FINGERPRINT_RECORD;   // 168: fingerprint_record_rtp.bin (Fingerprint confirm, 31ms)
+    case Effect::RINGTONE_15:
+        return RTP_UNLOCK_FAILED;        // 76: Unlock_Failed_RTP.bin (Unlock/biometric failed, 268ms)
+    default:
+        return RTP_FEEDBACK_NEUTRAL;     // 166
+    }
+}
+
 /** Play vibration
  *
  *  @param effectId:  ID of the predefined effect will be played. If effectId is valid
@@ -283,7 +454,17 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
 
         mCurrAppId = effect.id;
         if (effectId != INVALID_VALUE && playLengthMs != NULL) {
-            *playLengthMs = data[1] * 1000 + data[2];
+            long rtpDur = getRtpDurationMs(effectId);
+            if (rtpDur > 0) {
+                *playLengthMs = rtpDur;
+            } else if (data[1] > 0 && data[2] > 0 && data[2] < 5000) {
+                *playLengthMs = data[2];
+            } else {
+                *playLengthMs = data[1] * 1000 + data[2];
+            }
+            if (*playLengthMs <= 0 || *playLengthMs >= 5000) {
+                *playLengthMs = 25;
+            }
 #ifdef USE_EFFECT_STREAM
             if (stream != NULL && stream->play_rate_hz != 0)
                 *playLengthMs = ((stream->length * 1000) / stream->play_rate_hz) + 1;
@@ -303,6 +484,8 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
                 ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
             goto errout;
         }
+        ALOGD("InputFFDevice::play: effectId=%d, playLength=%ldms",
+              effectId, playLengthMs ? *playLengthMs : -1);
     } else if (mCurrAppId != INVALID_VALUE) {
         ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCRMFF, mCurrAppId));
         if (ret == -1) {
@@ -321,10 +504,12 @@ errout:
 }
 
 int InputFFDevice::on(int32_t timeoutMs) {
+    ALOGD("InputFFDevice::on: timeoutMs=%d", timeoutMs);
     return play(INVALID_VALUE, timeoutMs, NULL);
 }
 
 int InputFFDevice::off() {
+    ALOGD("InputFFDevice::off");
     return play(INVALID_VALUE, 0, NULL);
 }
 
@@ -336,6 +521,8 @@ int InputFFDevice::setAmplitude(uint8_t amplitude) {
     /* For QMAA compliance, return OK even if vibrator device doesn't exist */
     if (!isPresent())
         return 0;
+
+    ALOGD("InputFFDevice::setAmplitude: amplitude=%u", amplitude);
 
     tmp = amplitude * STRONG_MAGNITUDE / 255;
     ie.type = EV_FF;
@@ -372,7 +559,10 @@ int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthM
         return -1;
     }
 
-    return play(effectId, INVALID_VALUE, playLengthMs);
+    int ret = play(effectId, INVALID_VALUE, playLengthMs);
+    ALOGD("playEffect: effectId=%d, strength=%d, playLength=%ldms, ret=%d",
+          effectId, static_cast<int>(es), playLengthMs ? *playLengthMs : -1, ret);
+    return ret;
 }
 
 int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLengthMs) {
@@ -384,13 +574,24 @@ int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLen
         return -1;
     }
 
-    primitiveId |= PRIMITIVE_ID_MASK;
-    tmp = (uint8_t)(amplitude * 0xff) * STRONG_MAGNITUDE / 255;
+    if (amplitude <= 0.0f) {
+        if (playLengthMs != NULL)
+            *playLengthMs = 0;
+        return 0;
+    }
+
+    // Map amplitude across [LIGHT_MAGNITUDE, STRONG_MAGNITUDE] (16383 ~ 32767).
+    tmp = LIGHT_MAGNITUDE + (int32_t)(amplitude * (STRONG_MAGNITUDE - LIGHT_MAGNITUDE));
+    if (tmp > STRONG_MAGNITUDE)
+        tmp = STRONG_MAGNITUDE;
     mCurrMagnitude = tmp;
 
-    ret = play(primitiveId, INVALID_VALUE, playLengthMs);
+    int rtpId = getRtpIdForPrimitive(static_cast<CompositePrimitive>(primitiveId));
+    ret = play(rtpId, INVALID_VALUE, playLengthMs);
+    ALOGD("playPrimitive: primitive=%d, rtpId=%d, scale=%.2f, playLength=%ldms, ret=%d",
+          primitiveId, rtpId, amplitude, playLengthMs ? *playLengthMs : -1, ret);
     if (ret != 0)
-        ALOGE("Failed to play primitive %d", primitiveId);
+        ALOGE("Failed to play primitive %d (rtpId %d)", primitiveId, rtpId);
 
     return ret;
 }
@@ -562,8 +763,6 @@ VibratorOL::~VibratorOL() {
         close(pipefd[1]);
 }
 
-static int getPrimitiveDurationFromSysfs(uint32_t primitive_id, int32_t* durationMs);
-
 ndk::ScopedAStatus VibratorOL::getCapabilities(int32_t* _aidl_return) {
     *_aidl_return = IVibrator::CAP_ON_CALLBACK;
 
@@ -576,16 +775,9 @@ ndk::ScopedAStatus VibratorOL::getCapabilities(int32_t* _aidl_return) {
         *_aidl_return |= IVibrator::CAP_AMPLITUDE_CONTROL;
     if (ff.mSupportEffects) {
         *_aidl_return |= IVibrator::CAP_PERFORM_CALLBACK;
-        int32_t primitiveDuration = 0;
-        uint32_t primitiveId = static_cast<uint32_t>(CompositePrimitive::CLICK);
-#ifndef USE_EFFECT_STREAM
-        getPrimitiveDurationFromSysfs(primitiveId, &primitiveDuration);
-        if (primitiveDuration != 0)
-#else
         std::vector<CompositePrimitive> supportedPrimitives;
         getSupportedPrimitives(&supportedPrimitives);
-        if (supportedPrimitives.size() > 0)
-#endif
+        if (!supportedPrimitives.empty())
             *_aidl_return |= IVibrator::CAP_COMPOSE_EFFECTS;
     }
     if (ff.mSupportExternalControl)
@@ -657,25 +849,22 @@ ndk::ScopedAStatus VibratorOL::perform(Effect effect, EffectStrength es, const s
     if (ledVib.mDetected)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
-    ALOGD("Vibrator perform effect %d", effect);
-
-    if (Offload.mEnabled == 1) {
-         if ((effect < Effect::CLICK) ||
-             ((effect > Effect::HEAVY_CLICK) && (effect < Effect::RINGTONE_12)) ||
-             (effect > Effect::RINGTONE_15))
-             return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
-    }
-#ifndef USE_EFFECT_STREAM
-    else {
-         if (effect < Effect::CLICK || effect > Effect::HEAVY_CLICK)
-             return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
-    }
-#endif
+    if (effect < Effect::CLICK || effect > Effect::TEXTURE_TICK)
+        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
     if (es != EffectStrength::LIGHT && es != EffectStrength::MEDIUM && es != EffectStrength::STRONG)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
-    ret = ff.playEffect((static_cast<int>(effect)), es, &playLengthMs);
+    int effectId = getEffectId(effect);
+    if (effectId < 10) {
+        ALOGD("Vibrator perform ram effect=%d -> ramId=%d, strength=%d",
+              static_cast<int>(effect), effectId, static_cast<int>(es));
+    } else {
+        ALOGD("Vibrator perform rtp effect=%d -> rtpId=%d, strength=%d",
+              static_cast<int>(effect), effectId, static_cast<int>(es));
+    }
+
+    ret = ff.playEffect(effectId, es, &playLengthMs);
     if (ret != 0)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_SERVICE_SPECIFIC));
 
@@ -704,7 +893,12 @@ ndk::ScopedAStatus VibratorOL::getSupportedEffects(std::vector<Effect>* _aidl_re
         }
 #ifndef USE_EFFECT_STREAM
         *_aidl_return = {Effect::CLICK, Effect::DOUBLE_CLICK, Effect::TICK, Effect::THUD,
-                         Effect::POP, Effect::HEAVY_CLICK};
+                         Effect::POP, Effect::HEAVY_CLICK, Effect::TEXTURE_TICK,
+                         Effect::RINGTONE_1, Effect::RINGTONE_2, Effect::RINGTONE_3,
+                         Effect::RINGTONE_4, Effect::RINGTONE_5, Effect::RINGTONE_6,
+                         Effect::RINGTONE_7, Effect::RINGTONE_8, Effect::RINGTONE_9,
+                         Effect::RINGTONE_10, Effect::RINGTONE_11, Effect::RINGTONE_12,
+                         Effect::RINGTONE_13, Effect::RINGTONE_14, Effect::RINGTONE_15};
 #else
     for (int32_t effectId = static_cast<int32_t>(Effect::CLICK);
          effectId <= static_cast<int32_t>(Effect::TEXTURE_TICK);
@@ -792,80 +986,17 @@ ndk::ScopedAStatus VibratorOL::getSupportedPrimitives(std::vector<CompositePrimi
     return ndk::ScopedAStatus::ok();
 }
 
-static int getPrimitiveDurationFromSysfs(uint32_t primitive_id, int32_t* durationMs) {
-    int count = 0;
-    int fd = 0;
-    int ret = 0;
-    /* the Max primitive id is 32767, so define the size of primitive_buf to 6 */
-    char primitive_buf[6];
-    /* the max primitive_duration is the max value of int32, so define the size to 10 */
-    char primitive_duration[10];
-    char primitive_duration_sysfs[50];
-
-    ret = snprintf(primitive_duration_sysfs, sizeof(primitive_duration_sysfs), "%s%s", HAPTICS_SYSFS, "/primitive_duration");
-    if (ret < 0) {
-        ALOGE("Failed to get primitive duration node, ret = %d\n", ret);
-        return ret;
-    }
-
-    count = snprintf(primitive_buf, sizeof(primitive_buf), "%d%c", primitive_id, '\n');
-    if (count < 0) {
-        ALOGE("Failed to get primitive id, count = %d\n", count);
-        ret = count;
-        return ret;
-    }
-
-    fd = TEMP_FAILURE_RETRY(open(primitive_duration_sysfs, O_RDWR));
-    if (fd < 0) {
-        ALOGE("open %s failed, errno = %d", primitive_duration_sysfs, errno);
-        ret = fd;
-        return ret;
-    }
-
-    ret = TEMP_FAILURE_RETRY(write(fd, primitive_buf, count));
-    if (ret < 0) {
-        ALOGE("write primitive %d failed, errno = %d", primitive_id, errno);
-        goto close_fd;
-    }
-
-    ret = TEMP_FAILURE_RETRY(lseek(fd, 0, SEEK_SET));
-    if (ret < 0) {
-        ALOGE("lseek fd to file head failed, errno = %d", errno);
-        goto close_fd;
-    }
-
-    ret = TEMP_FAILURE_RETRY(read(fd, primitive_duration, sizeof(primitive_duration)));
-    if (ret < 0) {
-        ALOGE("read primitive %d failed, errno = %d", primitive_id, errno);
-        goto close_fd;
-    }
-
-    *durationMs = atoi(primitive_duration);
-    *durationMs /= 1000;
-
-close_fd:
-    ret = TEMP_FAILURE_RETRY(close(fd));
-    if (ret < 0) {
-        ALOGE("close primitive duration device failed, errno = %d", errno);
-        return ret;
-    }
-
-    return ret;
-}
-
 ndk::ScopedAStatus VibratorOL::getPrimitiveDuration(CompositePrimitive primitive,
                                                   int32_t* durationMs) {
-    uint32_t primitive_id = static_cast<uint32_t>(primitive);
-    int ret = 0;
-
 #ifdef USE_EFFECT_STREAM
-    primitive_id |= PRIMITIVE_ID_MASK ;
+    uint32_t primitive_id = static_cast<uint32_t>(primitive);
+    primitive_id |= PRIMITIVE_ID_MASK;
     const struct effect_stream *stream;
     stream = get_effect_stream(primitive_id);
     if (stream != NULL && stream->play_rate_hz != 0)
         *durationMs = ((stream->length * 1000) / stream->play_rate_hz) + 1;
 
-    ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
+    ALOGD("primitive-%d duration is %dms", static_cast<int>(primitive), *durationMs);
     return ndk::ScopedAStatus::ok();
 #endif
 
@@ -875,12 +1006,19 @@ ndk::ScopedAStatus VibratorOL::getPrimitiveDuration(CompositePrimitive primitive
         return ndk::ScopedAStatus::ok();
     }
 
-    ret = getPrimitiveDurationFromSysfs(primitive_id, durationMs);
-    if (ret < 0)
-        return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
+    if (primitive == CompositePrimitive::NOOP) {
+        *durationMs = 0;
+        return ndk::ScopedAStatus::ok();
+    }
 
-    ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
+    int rtpId = getRtpIdForPrimitive(primitive);
+    *durationMs = getRtpDurationMs(rtpId);
+    if (*durationMs <= 0) {
+        *durationMs = 15;
+    }
 
+    ALOGD("getPrimitiveDuration: primitive=%d -> rtpId=%d, duration=%dms",
+          static_cast<int>(primitive), rtpId, *durationMs);
     return ndk::ScopedAStatus::ok();
 }
 
@@ -976,7 +1114,9 @@ ndk::ScopedAStatus VibratorOL::compose(const std::vector<CompositeEffect>& compo
     std::vector<CompositePrimitive> supported;
     getSupportedPrimitives(&supported);
 
-    for (auto& e : composite) {
+    ALOGD("compose: count=%zu", composite.size());
+    for (size_t i = 0; i < composite.size(); i++) {
+        const auto& e = composite[i];
         if (e.delayMs > ComposeDelayMaxMs) {
             return ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
         }
@@ -989,6 +1129,10 @@ ndk::ScopedAStatus VibratorOL::compose(const std::vector<CompositeEffect>& compo
 
         getPrimitiveDuration(e.primitive, &durationMs);
         timeoutMs += durationMs + e.delayMs;
+
+        int rtpId = getRtpIdForPrimitive(e.primitive);
+        ALOGD("  compose[%zu]: primitive=%d -> rtpId=%d, scale=%.2f, delay=%dms",
+              i, static_cast<int>(e.primitive), rtpId, e.scale, e.delayMs);
     }
 
     /*
@@ -1001,10 +1145,11 @@ ndk::ScopedAStatus VibratorOL::compose(const std::vector<CompositeEffect>& compo
         ALOGD("Last composePlayThread has not done yet, stop it manually");
         off();
 
-        while (inComposition && timeoutMs--)
+        int waitTimeout = 100;
+        while (inComposition && waitTimeout--)
             usleep(1000);
 
-        if (timeoutMs == 0) {
+        if (waitTimeout <= 0 && inComposition) {
             ALOGE("wait for last composePlayThread done timeout");
             return ndk::ScopedAStatus::fromExceptionCode(EX_SERVICE_SPECIFIC);
         }
